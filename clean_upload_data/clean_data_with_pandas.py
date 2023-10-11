@@ -112,3 +112,45 @@ def get_final_result(target_df, target_columns, final_file_name='final_df.xlsx')
     final_df = insert_json_cols(target_df, existing_cols)  # Insert json columns
 
     final_df.to_csv(final_file_name, index=False) # Save to csv file in documents folder
+
+
+def check_col_in_df(df, col):
+    """
+    Check if a column exists in a DataFrame
+    :param df: DataFrame
+    :param col: Column name
+    :return: Boolean
+    """
+    if col in df.columns:
+        print(f"Column '{col}' exists in the DataFrame.")
+        return True
+    else:
+        print(f"Column '{col}' does not exist in the DataFrame.")
+        return False
+
+def check_cell_in_col(df, value_to_check , col_to_check):
+    """
+    Check if a cell exists in a DataFrame
+    :param df: DataFrame
+    :param cell_value: Cell value
+    :return: Boolean
+    """
+    result = df[col_to_check].isin([value_to_check])
+    if result.any():
+        print(f"Cell '{value_to_check}' exists in the DataFrame.")
+        return True
+    else:
+        print(f"Cell '{value_to_check}' does not exist in the DataFrame.")
+        return False
+
+def filter_df_by_value(df, col, value):
+    """
+    Filter DataFrame by value
+    :param df: DataFrame
+    :param col: Column name
+    :param value: Value to filter
+    :return: DataFrame
+    """
+
+    filtered_df = df[df[col] == value]
+    return filtered_df
