@@ -1,8 +1,8 @@
 import pandas as pd
 import os
-from get_sharepoint_files import get_username, get_sharepoint_folder, get_sharepoint_files
+from get_sharepoint_files import get_username, get_sharepoint_folder
 from clean_upload_data import get_final_result, replace_quotes_in_columns, upload_to_s3, \
-    check_col_in_df, check_cell_in_col, filter_df_by_value
+    check_col_in_df, check_cell_in_col, filter_df_by_value, replace_commas_with_semicolon
 
 import io
 
@@ -45,6 +45,9 @@ if __name__ == '__main__':
 
             # Filter df by assign_folder_id
             df = filter_df_by_value(df, assign_folder_name_col, assign_folder_id_value)
+
+            # Replace commas with semicolon
+            df = replace_commas_with_semicolon(df)
 
             # csv file path
             csv_file_path = os.path.join(file_path, file_name.split('.', 1)[0] + '.csv')

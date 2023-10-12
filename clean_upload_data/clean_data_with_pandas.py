@@ -154,3 +154,13 @@ def filter_df_by_value(df, col, value):
 
     filtered_df = df[df[col] == value]
     return filtered_df
+
+def replace_commas_with_semicolon(df):
+    """
+    Replace commas with semicolon in a DataFrame
+    :param df: DataFrame
+    :return: DataFrame
+    """
+    df_copy = df.copy()
+    df_copy = df_copy.replace(',',';', regex=True)
+    return df_copy
