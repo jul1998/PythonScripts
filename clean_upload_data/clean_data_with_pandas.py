@@ -110,6 +110,7 @@ def get_final_result(target_df, target_columns, final_file_name='final_df.xlsx')
         existing_cols.append(target)
 
     final_df = insert_json_cols(target_df, existing_cols)  # Insert json columns
+    final_df = replace_commas_with_semicolon(final_df)  # Replace commas with semicolon
 
     final_df.to_csv(final_file_name, index=False) # Save to csv file in documents folder
 
@@ -161,6 +162,6 @@ def replace_commas_with_semicolon(df):
     :param df: DataFrame
     :return: DataFrame
     """
-    df_copy = df.copy()
-    df_copy = df_copy.replace(',',';', regex=True)
-    return df_copy
+
+    df = df.replace(',',';', regex=True)
+    return df

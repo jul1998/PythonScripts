@@ -46,15 +46,16 @@ if __name__ == '__main__':
             # Filter df by assign_folder_id
             df = filter_df_by_value(df, assign_folder_name_col, assign_folder_id_value)
 
-            # Replace commas with semicolon
-            df = replace_commas_with_semicolon(df)
+
 
             # csv file path
             csv_file_path = os.path.join(file_path, file_name.split('.', 1)[0] + '.csv')
 
             # clean data
             df = replace_quotes_in_columns(df, target_columns) # Replace single quotes with double quotes
+
             get_final_result(df, target_columns=target_columns, final_file_name=csv_file_path) # Get final result
+
 
             # upload to s3
             upload_to_s3(bucket, csv_file_path, 'sim_issues/' + file_name.split('.', 1)[0] + '.csv')
