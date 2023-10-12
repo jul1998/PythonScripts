@@ -32,22 +32,31 @@ def replace_quotes_in_columns(df, columns_to_replace):
         return df
 
 
-def extract_id_value_pairs(json_str):
+def extract_id_value_checked_pairs(json_str):
     """
-    Extract id-value pairs from json string
+    Extract id, value, and checked pairs from JSON string with a specific structure.
     :param json_str: JSON string
-    :return:  dict of id-value pairs
+    :return: Dictionary with keys "id," "value," and "checked" if "checked" key is present
     """
+
+    if isinstance(json_str, str):
+        # Replace "True" and "False" with "true" and "false" in the JSON string
+        json_str = json_str.replace('True', 'true').replace('False', 'false')
+
     try:
         data = json.loads(json_str)
 
         id_value_dict = {item['id']: item['value'] for item in data}
-        # print(id_value_dict)
+
+        # Check for "checked" key and add it to the dictionary if present
+        for item in data:
+            if 'checked' in item:
+                id_value_dict['checked'] = item['checked']
+
         return id_value_dict
 
     except (json.JSONDecodeError, TypeError):
         return {}
-
 
 def remove_useless_columns(df, *cols_to_remove):
     """
@@ -71,12 +80,12 @@ def insert_json_cols(df, target_columns):
     df_copy = df.copy()
 
     for col in target_columns:
-        df_copy[f'{col}_dict'] = df_copy[col].apply(extract_id_value_pairs)  # Extract id-value pairs
+        df_copy[f'{col}_dict'] = df_copy[col].apply(extract_id_value_checked_pairs)  # Extract id-value pairs
         customfields_df = pd.DataFrame(df_copy[f'{col}_dict'].tolist(),
                                        index=df_copy.index)  # Convert dict to DataFrame
         df_copy = pd.concat([df_copy, customfields_df], axis=1)  # Concatenate the two DataFrames
         df_copy = remove_useless_columns(df_copy,
-                                         f'{col}_dict')  # Remove the useless column, Comment this line if you want to keep the column
+                                          f'{col}_dict')  # Remove the useless column, Comment this line if you want to keep the column
 
     return df_copy
 
