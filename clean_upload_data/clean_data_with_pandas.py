@@ -162,7 +162,7 @@ def filter_df_by_value(df, col, value):
     :return: DataFrame
     """
 
-    filtered_df = df[df[col] == value]
+    filtered_df = df[df[col].isin(value)]
     return filtered_df
 
 def replace_commas_with_semicolon(df):

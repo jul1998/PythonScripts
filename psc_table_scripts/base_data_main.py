@@ -12,8 +12,14 @@ import io
 
 #SIM required data
 assign_folder_name_col = 'assignedfolder'
-assign_folder_id_value = "a6a3374a-76ae-4df4-9607-00c59185a127"
-
+assign_folder_id_value = [
+    "a6a3374a-76ae-4df4-9607-00c59185a127", # Parent folder id
+    "c5d81cf4-9a32-497b-b090-4fe82fc672eb", # Executive Inventory Removal Requests
+    "b850ac6c-a367-4733-8f31-698f59b215ac", # Non-Executive Escalations
+    "a1c453fc-bf1a-42f5-84b6-82fe0932d8c8", # Program Action SIMs
+    "58841026-814c-4be8-a487-c823bb4133d4", # Removal Order Cancellation
+    "10265259-86e9-476a-9a5e-9ca05c4f349c" # Removal Stoppage
+]
 # S3 required data
 bucket = 'quicksigth-dashboards'
 target_columns = ['customfields_number', 'customfields_date']  # Specify target columns inside the excel file
@@ -40,9 +46,10 @@ def run_base_data():
             if not check_col_in_df(df, assign_folder_name_col):
                 continue
 
-            # Check if assign_folder_id value exists in df
-            if not check_cell_in_col(df, assign_folder_id_value, assign_folder_name_col):
-                continue
+            # Loop over each value in the list and check if it exists in the DataFrame
+            for value in assign_folder_id_value:
+                if not check_cell_in_col(df, value, assign_folder_name_col):
+                    continue
 
             # Filter df by assign_folder_id
             df = filter_df_by_value(df, assign_folder_name_col, assign_folder_id_value)
