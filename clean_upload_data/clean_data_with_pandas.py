@@ -31,10 +31,36 @@ def replace_quotes_in_columns(df, columns_to_replace):
         print("An error occurred while processing columns.")
         return df
 
-
 def extract_id_value_checked_pairs(json_str):
     """
     Extract id, value, and checked pairs from JSON string with a specific structure.
+    :param json_str: JSON string
+    :return: Dictionary with keys "id," "value," and "checked" if "checked" key is present
+    """
+
+    if isinstance(json_str, str):
+        # Replace "True" and "False" with "true" and "false" in the JSON string
+        json_str = json_str.replace('True', 'true').replace('False', 'false')
+
+    try:
+        data = json.loads(json_str)
+
+        # Create a dictionary to store 'value' names and their corresponding 'checked' values
+        values_dict = {}
+
+        for item in data:
+            if 'value' in item and 'checked' in item:
+                values_dict[item['value']] = item['checked']
+
+
+        return values_dict
+
+    except (json.JSONDecodeError, TypeError):
+        return pd.DataFrame()
+
+def extract_id_value_pairs(json_str):
+    """
+    Extract id and value pairs from JSON string with a specific structure.
     :param json_str: JSON string
     :return: Dictionary with keys "id," "value," and "checked" if "checked" key is present
     """
@@ -58,6 +84,7 @@ def extract_id_value_checked_pairs(json_str):
     except (json.JSONDecodeError, TypeError):
         return {}
 
+
 def remove_useless_columns(df, *cols_to_remove):
     """
     Remove useless columns
@@ -70,7 +97,58 @@ def remove_useless_columns(df, *cols_to_remove):
     return df_copy
 
 
-def insert_json_cols(df, target_columns):
+def modify_id(df):
+    """
+    Modify the "id" column in a DataFrame.
+    :param df: DataFrame
+    :return: DataFrame
+    """
+
+    def replace_id(row):
+        json_row = row['value']
+        if isinstance(json_row, str):
+            # Replace "True" and "False" with "true" and "false" in the JSON string
+            json_row = json_row.replace('True', 'true').replace('False', 'false')
+        try:
+            # Replace the "id" in each dictionary with the value from the "id" column
+            replaced_values = [{**item, 'id': row['id']} for item in json.loads(json_row)]
+            return replaced_values
+        except (TypeError, KeyError):
+            return None
+
+    # Apply the function to create a new column with replaced "id"
+    df['replaced_values'] = df.apply(replace_id, axis=1)
+    return df
+
+def pivot_json_values(df, json_column_name):
+    """
+    Pivot JSON values in a DataFrame.
+    :param df:  DataFrame
+    :param json_column_name:  Name of the column containing JSON values
+    :return:  DataFrame
+    """
+    def extract_checked_values(json_list):
+        try:
+            # Create a list of 'value' for each 'id' with 'checked' as True
+            checked_values = {item['id']: [] for item in json_list if item['checked']}
+            for item in json_list:
+                if item['checked']:
+                    checked_values[item['id']].append(item['value'])
+            return checked_values if checked_values else None
+        except (TypeError, KeyError):
+            return None
+
+    # Apply the function to create a new column
+    df['checked_values'] = df[json_column_name].apply(extract_checked_values)
+
+    # Convert the dictionary to a DataFrame
+    result_df = pd.DataFrame(df['checked_values'].to_dict()).T.reset_index()
+    result_df.columns.name = None  # Remove the name of the columns
+
+    return result_df
+
+
+def insert_json_cols(df, target_columns, json_function):
     """
     Insert JSON columns for multiple target columns.
     :param df: DataFrame
@@ -80,7 +158,7 @@ def insert_json_cols(df, target_columns):
     df_copy = df.copy()
 
     for col in target_columns:
-        df_copy[f'{col}_dict'] = df_copy[col].apply(extract_id_value_checked_pairs)  # Extract id-value pairs
+        df_copy[f'{col}_dict'] = df_copy[col].apply(json_function)  # Extract id-value pairs
         customfields_df = pd.DataFrame(df_copy[f'{col}_dict'].tolist(),
                                        index=df_copy.index)  # Convert dict to DataFrame
         df_copy = pd.concat([df_copy, customfields_df], axis=1)  # Concatenate the two DataFrames
@@ -99,7 +177,7 @@ def concat_df(*df):
     return pd.concat(df, axis=1)
 
 
-def get_final_result(target_df, target_columns, final_file_name='final_df.xlsx'):
+def get_final_result(target_df, target_columns, final_file_name='final_df.xlsx', json_function=extract_id_value_pairs):
     """
     Get final result
     :param target_df: DataFrame
@@ -118,7 +196,7 @@ def get_final_result(target_df, target_columns, final_file_name='final_df.xlsx')
             continue
         existing_cols.append(target)
 
-    final_df = insert_json_cols(target_df, existing_cols)  # Insert json columns
+    final_df = insert_json_cols(target_df, existing_cols, json_function)  # Insert json columns
     final_df = replace_commas_with_semicolon(final_df)  # Replace commas with semicolon
 
     final_df.to_csv(final_file_name, index=False) # Save to csv file in documents folder
