@@ -1,10 +1,12 @@
-import pandas as pd
-import os
-from get_sharepoint_files import get_username, get_sharepoint_folder
-from clean_upload_data import get_final_result, replace_quotes_in_columns, upload_to_s3, \
-    check_col_in_df, check_cell_in_col, modify_id, pivot_json_values, concat_df, remove_useless_columns
-
 import io
+import os
+
+import pandas as pd
+
+from clean_upload_data import replace_quotes_in_columns, upload_to_s3, \
+    check_col_in_df, check_cell_in_col, modify_id, pivot_json_values, concat_df, remove_useless_columns, \
+    replace_commas_with_semicolon
+from get_sharepoint_files import get_username, get_sharepoint_folder
 
 # final_file_name = 'df_other_sim.csv'  # Specify final file name as a csv file to upload to s3
 # target_file = 'json_other_sim.xlsx'
@@ -62,6 +64,9 @@ def run_checkboxes_data_GEAR():
 
             df = concat_df(df, values_check_df)
             df = remove_useless_columns(df, 'replaced_values')
+
+            # Replace commas by semicolon
+            df = replace_commas_with_semicolon(df)
 
             # export to csv
             df.to_csv(csv_file_path, index=False)
