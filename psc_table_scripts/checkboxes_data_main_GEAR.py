@@ -34,7 +34,7 @@ files = folder.files
 def run_checkboxes_data_GEAR():
     for file in files:
         file_name = file['Name']
-        if file_name.endswith('.xlsx') and file_name == "pivot_gear_checkboxes.xlsx":
+        if file_name.endswith('.xlsx') and file_name == "ps_sim_issues_folders_gear_checkboxes_psc.xlsx":
             file_contents = folder.get_file(file_name)
             print(f"Reading {file_name}...")
 
@@ -83,7 +83,7 @@ def run_checkboxes_data_GEAR():
             # id-value-checked pairs
 
             # upload to s3
-           # upload_to_s3(bucket, csv_file_path, 'sim_issues/' + file_name.split('.', 1)[0] + '.csv')
+            upload_to_s3(bucket, csv_file_path, 'sim_issues/' + file_name.split('.', 1)[0] + '.csv')
 
 
         else:

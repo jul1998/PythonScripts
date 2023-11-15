@@ -5,7 +5,9 @@ from clean_upload_data import get_final_result, replace_quotes_in_columns, uploa
     check_col_in_df, check_cell_in_col, filter_df_by_value, extract_id_value_pairs
 
 import io
+from dotenv import load_dotenv
 
+load_dotenv() # Load environment variables
 # final_file_name = 'df_other_sim.csv'  # Specify final file name as a csv file to upload to s3
 # target_file = 'json_other_sim.xlsx'
 
@@ -24,7 +26,7 @@ bucket = 'quicksigth-dashboards'
 target_columns = ['customfields_number', 'customfields_date']  # Specify target columns inside the excel file
 
 # Sharepoint required data
-file_path = "C:/Users/julsola/Documents/Py Tests/"  # Local path where files were stored
+file_path = os.getenv('FILE_PATH')  # Local path where files were stored
 site_url = "https://share.amazon.com/sites/ComplianceGlobalOperationsSP/"
 username, password = get_username()
 folder = get_sharepoint_folder(username, password, site_url)
