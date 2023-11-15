@@ -31,32 +31,7 @@ def replace_quotes_in_columns(df, columns_to_replace):
         print("An error occurred while processing columns.")
         return df
 
-def extract_id_value_checked_pairs(json_str):
-    """
-    Extract id, value, and checked pairs from JSON string with a specific structure.
-    :param json_str: JSON string
-    :return: Dictionary with keys "id," "value," and "checked" if "checked" key is present
-    """
 
-    if isinstance(json_str, str):
-        # Replace "True" and "False" with "true" and "false" in the JSON string
-        json_str = json_str.replace('True', 'true').replace('False', 'false')
-
-    try:
-        data = json.loads(json_str)
-
-        # Create a dictionary to store 'value' names and their corresponding 'checked' values
-        values_dict = {}
-
-        for item in data:
-            if 'value' in item and 'checked' in item:
-                values_dict[item['value']] = item['checked']
-
-
-        return values_dict
-
-    except (json.JSONDecodeError, TypeError):
-        return pd.DataFrame()
 
 def extract_id_value_pairs(json_str):
     """
@@ -97,28 +72,40 @@ def remove_useless_columns(df, *cols_to_remove):
     return df_copy
 
 
-def modify_id(df):
+def get_value_checked_if_true(df, column_names):
     """
-    Modify the "id" column in a DataFrame.
+    Modify the specified columns in a DataFrame.
     :param df: DataFrame
+    :param column_names: List of column names to modify
     :return: DataFrame
     """
 
-    def replace_id(row):
-        json_row = row['value']
+    def replace_id(row, column_name):
+        json_row = row[column_name]
+
         if isinstance(json_row, str):
             # Replace "True" and "False" with "true" and "false" in the JSON string
             json_row = json_row.replace('True', 'true').replace('False', 'false')
-        try:
-            # Replace the "id" in each dictionary with the value from the "id" column
-            replaced_values = [{**item, 'id': row['id']} for item in json.loads(json_row)]
-            return replaced_values
-        except (TypeError, KeyError):
-            return None
 
-    # Apply the function to create a new column with replaced "id"
-    df['replaced_values'] = df.apply(replace_id, axis=1)
-    return df
+            try:
+                # Load the JSON string
+                data = json.loads(json_row)
+
+                # Filter dictionaries based on 'checked' field
+                checked_values = ';'.join([item['value'] for item in data if item.get('checked', False)])
+
+                return checked_values
+
+            except json.JSONDecodeError:
+                return None
+
+    result_df = pd.DataFrame()
+
+    for column_name in column_names:
+        # Apply the function to create a new column with checked values
+        result_df[column_name + '_checked_values'] = df.apply(replace_id, axis=1, column_name=column_name)
+
+    return result_df
 
 def pivot_json_values(df, json_column_name):
     """
