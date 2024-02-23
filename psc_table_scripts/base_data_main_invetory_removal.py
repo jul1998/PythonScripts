@@ -19,7 +19,8 @@ assign_folder_id_value = [
     "b850ac6c-a367-4733-8f31-698f59b215ac",  # Non-Executive Escalations
     "a1c453fc-bf1a-42f5-84b6-82fe0932d8c8",  # Program Action SIMs
     "58841026-814c-4be8-a487-c823bb4133d4",  # Removal Order Cancellation
-    "10265259-86e9-476a-9a5e-9ca05c4f349c"  # Removal Stoppage
+    "10265259-86e9-476a-9a5e-9ca05c4f349c",  # Removal Stoppage
+    "fdb53825-486b-440f-a132-0cfe920984f4" # FC OUTREACH
 ]
 # S3 required data
 bucket = 'quicksigth-dashboards'
